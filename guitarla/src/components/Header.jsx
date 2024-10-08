@@ -1,4 +1,4 @@
-export default function Header() {
+function Header() {
   return (
     <>
       <header className="py-5 header">
@@ -77,3 +77,6 @@ export default function Header() {
     </>
   );
 }
+
+
+export default Header
