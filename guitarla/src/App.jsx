@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Guitar from "./components/Guitar";
 import Header from "./components/Header";
 import { db } from './data/db';
@@ -8,9 +8,67 @@ function App() {
   const [data, setdata] = useState(db)
   const [cart, setCart] = useState([])
 
+  useEffect(() => {
+    localStorage.setItem('cart', JSON.stringify(cart))
+  }, [cart])
+
+  function addToCart(item) {
+    const itemExist = cart.findIndex(guitar => guitar.id === item.id)
+    
+    if (itemExist >= 0) { // Existe en el carrito
+      if (cart[itemExist].quantity >= 5) return
+      const updateCart = [...cart]
+      updateCart[itemExist].quantity++
+      setCart(updateCart)
+    } else {
+      item.quantity = 1
+      setCart([...cart, item])
+    }
+  }
+
+  function removeFromCart(id) {
+    setCart(prevCart => prevCart.filter(guitar => guitar.id !== id))
+  }
+
+  function increaseQuantity(id) {
+    const updatedCart = cart.map(item => {
+      if (item.id === id && item.quantity < 5) {
+        return {
+          ...item,
+          quantity: item.quantity + 1
+        }
+      }
+      return item
+    })
+    setCart(updatedCart)
+  }
+
+  function decreaseQuantity(id) {
+    const updatedCart = cart.map(item => {
+      if (item.id === id && item.quantity > 1) {
+        return {
+          ...item,
+          quantity: item.quantity - 1
+        }
+      }
+      return item
+    })
+    setCart(updatedCart)
+  }
+
+  function cleanCart() {
+    setCart([])
+  }
+
   return (
     <>
-      <Header />
+      <Header
+        cart={cart}
+        removeFromCart={removeFromCart}
+        increaseQuantity={increaseQuantity}
+        decreaseQuantity={decreaseQuantity}
+        cleanCart={cleanCart}
+      />
 
       <main className="container-xl mt-5">
         <h2 className="text-center">Nuestra Colección</h2>
@@ -21,6 +79,7 @@ function App() {
               key={guitar.id}
               guitar={guitar}
               setCart={setCart}
+              addToCart={addToCart}
             />
           ))}
         </div>
